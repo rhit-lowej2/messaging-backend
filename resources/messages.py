@@ -51,8 +51,14 @@ class GetDirectMessages(Resource):
         
         messages = []
         for msg in messages_cursor:
+            sender_info = db.users.find_one(
+                {"_id": msg["sender_id"]},
+                {"username": 1, "_id": 0}  
+            )
+            sender_username = sender_info["username"] if sender_info else "Unknown"
             messages.append({
                 "sender_id": str(msg["sender_id"]),
+                "sender_username": sender_username,
                 "recipient_id": str(msg["recipient_id"]),
                 "content": msg["content"],
                 "timestamp": msg["timestamp"].isoformat()
@@ -90,8 +96,15 @@ class GetPublicMessages(Resource):
         messages_cursor = db.messages.find(query).sort("timestamp", -1)
         messages = []
         for msg in messages_cursor:
+            sender_info = db.users.find_one(
+                {"_id": msg["sender_id"]},
+                {"username": 1, "_id": 0}
+            )
+            sender_username = sender_info["username"] if sender_info else "Unknown"
+
             messages.append({
                 "sender_id": str(msg["sender_id"]),
+                "sender_username": sender_username,
                 "content": msg["content"],
                 "tags": msg.get("tags", []),
                 "timestamp": msg["timestamp"].isoformat()
@@ -130,8 +143,15 @@ class GetGroupMessages(Resource):
         
         messages = []
         for msg in messages_cursor:
+            sender_info = db.users.find_one(
+                {"_id": msg["sender_id"]},
+                {"username": 1, "_id": 0}
+            )
+            sender_username = sender_info["username"] if sender_info else "Unknown"
+
             messages.append({
                 "sender_id": str(msg["sender_id"]),
+                "sender_username": sender_username,
                 "content": msg["content"],
                 "timestamp": msg["timestamp"].isoformat()
             })

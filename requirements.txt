@@ -1,0 +1,6 @@
+Flask
+Flask-RESTful
+Flask-Cors
+pymongo
+bcrypt
+Flask-JWT-Extended

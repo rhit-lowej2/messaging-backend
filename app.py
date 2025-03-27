@@ -3,81 +3,47 @@
 from flask import Flask, jsonify, request, make_response
 from flask_restful import Resource, Api
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
+from resources.auth import Signup, Login, Profile
+from resources.messages import (DirectMessage, GetDirectMessages, PublicMessage, 
+                                GetPublicMessages, GroupMessage, GetGroupMessages)
+from resources.groups import CreateGroup
+from config import Config
 import bcrypt
-
-uri = "mongodb+srv://admin:cq3Nbw6BFbU7GPcR@private-messaging.hk8sb.mongodb.net/?retryWrites=true&w=majority&appName=private-messaging"
-
-# Create a new client and connect to the server
-client = MongoClient(uri, server_api=ServerApi('1'))
-# Send a ping to confirm a successful connection
-try:
-    client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
-except Exception as e:
-    print(e)
-
-auth = client['auth']
-
 
 # creating the flask app 
 app = Flask(__name__)
-cors = CORS(app)
-# creating an API object 
+app.config["JWT_SECRET_KEY"] = Config.JWT_SECRET_KEY
+CORS(app)
 api = Api(app)
+jwt = JWTManager(app)
 
-# making a class for a particular resource 
-# the get, post methods correspond to get and post requests 
-# they are automatically mapped by flask_restful. 
-# other methods include put, delete, etc. 
-class Login(Resource):
-    def post(self):
-        data = request.get_json()
-
-        user = data.get('username')
-        password = data.get('password').encode('utf-8')
-
-        if user and password:
-            out = auth.users.find_one({'username': user})
-            if out and bcrypt.checkpw(password, out['password']):
-                return make_response(jsonify({'login': True}), 200)
-
-        return make_response(jsonify({'error': "Failed to login"}), 409)
-
-
-class Signup(Resource):
-    def post(self):
-        data = request.get_json()
-
-        if not data or 'username' not in data or 'password' not in data:
-            return make_response(jsonify({"error": "Missing username or password"}), 400)
-
-        username = data['username']
-        password = data['password'].encode('utf-8')
-
-        if auth.users.find_one({'username': username}):
-            return make_response(jsonify({"error": "User already exists"}), 409)
-
-        auth.users.insert_one({'username': username, 'password': bcrypt.hashpw(password, bcrypt.gensalt())})
-
-        return make_response(jsonify({"message": "User created successfully"}), 201)
-
-# another resource to calculate the square of a number 
-class Square(Resource):
-
-    def get(self, num):
-
-        return jsonify({'square': num ** 2})
-
-
-    # adding the defined resources along with their corresponding urls
-api.add_resource(Login, '/login')
-api.add_resource(Square, '/square/<int:num>')
+# Register authentication routes.
 api.add_resource(Signup, '/signup')
+api.add_resource(Login, '/login')
+api.add_resource(Profile, '/profile')
 
+# Register messaging routes.
+api.add_resource(DirectMessage, '/message/direct')
+api.add_resource(GetDirectMessages, '/messages/direct')
+api.add_resource(PublicMessage, '/message/public')
+api.add_resource(GetPublicMessages, '/messages/public')
+api.add_resource(GroupMessage, '/message/group')
+api.add_resource(GetGroupMessages, '/messages/group/<string:group_id>')
 
-# driver function 
+# Register group management routes.
+api.add_resource(CreateGroup, '/group')
+
+# Global error handlers (optional).
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({"error": "Resource not found"}), 404)
+
+@app.errorhandler(500)
+def server_error(error):
+    return make_response(jsonify({"error": "Internal server error"}), 500)
+
 if __name__ == '__main__':
-
-    app.run(debug = True) 
+    app.run(debug=True)

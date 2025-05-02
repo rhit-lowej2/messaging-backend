@@ -9,7 +9,7 @@ from pymongo.server_api import ServerApi
 from resources.auth import Signup, Login, Profile
 from resources.messages import (DirectMessage, GetDirectMessages, PublicMessage, 
                                 GetPublicMessages, GroupMessage, GetGroupMessages)
-from resources.groups import CreateGroup
+from resources.groups import CreateGroup, GetGroups, CreateDM, GetDMs
 from config import Config
 import bcrypt
 
@@ -27,7 +27,7 @@ api.add_resource(Profile, '/profile')
 
 # Register messaging routes.
 api.add_resource(DirectMessage, '/message/direct')
-api.add_resource(GetDirectMessages, '/messages/direct')
+api.add_resource(GetDirectMessages, '/messages/direct/<string:recipient_id>')
 api.add_resource(PublicMessage, '/message/public')
 api.add_resource(GetPublicMessages, '/messages/public')
 api.add_resource(GroupMessage, '/message/group')
@@ -35,6 +35,9 @@ api.add_resource(GetGroupMessages, '/messages/group/<string:group_id>')
 
 # Register group management routes.
 api.add_resource(CreateGroup, '/group')
+api.add_resource(GetGroups, '/groups')
+api.add_resource(CreateDM, '/dm')
+api.add_resource(GetDMs, '/dms')
 
 # Global error handlers (optional).
 @app.errorhandler(404)
@@ -46,4 +49,5 @@ def server_error(error):
     return make_response(jsonify({"error": "Internal server error"}), 500)
 
 if __name__ == '__main__':
+    # context = ('server.crt', 'server.key')
     app.run(debug=True)

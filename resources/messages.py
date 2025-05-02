@@ -35,9 +35,8 @@ class DirectMessage(Resource):
 
 class GetDirectMessages(Resource):
     @jwt_required()
-    def get(self):
+    def get(self, recipient_id):
         user_id = get_jwt_identity()
-        recipient_id = request.args.get("recipient_id")
         if not recipient_id:
             return make_response(jsonify({"error": "Missing recipient_id parameter"}), 400)
         

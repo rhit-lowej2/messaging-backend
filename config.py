@@ -7,3 +7,4 @@ load_dotenv()
 
 class Config:
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")

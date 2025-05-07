@@ -8,9 +8,17 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 from bson.objectid import ObjectId
 from db import get_db
+from pymongo import ReturnDocument
 
 # For messaging, we use a separate collection named 'messages' in the default database.
 db = get_db()
+
+def should_show_ad(count: int) -> bool:
+    if count in (20, 50, 90):
+        return True
+    if count > 90 and (count - 90) % 40 == 0:
+        return True
+    return False
 
 class DirectMessage(Resource):
     @jwt_required()
@@ -31,7 +39,19 @@ class DirectMessage(Resource):
             "timestamp": datetime.utcnow()
         }
         db.messages.insert_one(message)
-        return make_response(jsonify({"message": "Direct message sent successfully"}), 201)
+
+        user_doc = db.users.find_one_and_update(
+            {'_id': ObjectId(sender_id)},
+            {'$inc': {'message_count': 1}},
+            return_document=ReturnDocument.AFTER
+        )
+        count = user_doc.get('message_count', 0)
+        show_ad = should_show_ad(count)
+
+        return make_response(jsonify({
+            "message": "Direct message sent successfully",
+            "showAd": show_ad
+        }), 201)
 
 class GetDirectMessages(Resource):
     @jwt_required()
@@ -84,7 +104,19 @@ class PublicMessage(Resource):
             "timestamp": datetime.utcnow()
         }
         db.messages.insert_one(message)
-        return make_response(jsonify({"message": "Public message sent successfully"}), 201)
+
+        user_doc = db.users.find_one_and_update(
+            {'_id': ObjectId(sender_id)},
+            {'$inc': {'message_count': 1}},
+            return_document=ReturnDocument.AFTER
+        )
+        count = user_doc.get('message_count', 0)
+        show_ad = should_show_ad(count)
+
+        return make_response(jsonify({
+            "message": "Public message sent successfully",
+            "showAd": show_ad
+        }), 201)
 
 class GetPublicMessages(Resource):
     def get(self):
@@ -131,7 +163,19 @@ class GroupMessage(Resource):
             "timestamp": datetime.utcnow()
         }
         db.messages.insert_one(message)
-        return make_response(jsonify({"message": "Group message sent successfully"}), 201)
+
+        user_doc = db.users.find_one_and_update(
+            {'_id': ObjectId(sender_id)},
+            {'$inc': {'message_count': 1}},
+            return_document=ReturnDocument.AFTER
+        )
+        count = user_doc.get('message_count', 0)
+        show_ad = should_show_ad(count)
+
+        return make_response(jsonify({
+            "message": "Group message sent successfully",
+            "showAd": show_ad
+        }), 201)
 
 class GetGroupMessages(Resource):
     @jwt_required()

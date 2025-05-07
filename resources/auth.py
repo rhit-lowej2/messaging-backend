@@ -40,7 +40,9 @@ class Signup(Resource):
             'display_name': display_name,
             'email': email,
             'password': hash_password(password),
-            'created_at': datetime.utcnow()
+            'created_at': datetime.utcnow(),
+            'message_count': 0,
+            'last_reset': datetime.utcnow()
         }
         db.users.insert_one(new_user)
         return make_response(jsonify({"message": "User registered successfully"}), 201)

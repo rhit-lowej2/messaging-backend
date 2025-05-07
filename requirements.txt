@@ -4,3 +4,6 @@ Flask-Cors
 pymongo
 bcrypt
 Flask-JWT-Extended
+gunicorn
+python-dotenv
+APScheduler

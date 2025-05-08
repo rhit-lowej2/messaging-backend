@@ -8,11 +8,12 @@ from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from resources.auth import Signup, Login, Profile
 from resources.membership import MembershipUpgrade
-from resources.messages import (DirectMessage, GetDirectMessages, PublicMessage, 
+from resources.messages import (DirectMessage, GetDirectMessages, PublicMessage,
                                 GetPublicMessages, GroupMessage, GetGroupMessages)
 from resources.groups import CreateGroup, GetGroups, CreateDM, GetDMs
 from resources.groups import CreateGroup
 import os
+from resources.painta_compliance import *
 from config import Config
 import bcrypt
 
@@ -20,7 +21,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 from db import get_db
 
-# creating the flask app 
+# creating the flask app
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = Config.JWT_SECRET_KEY
 CORS(app)
@@ -80,6 +81,11 @@ api.add_resource(GetGroups, '/groups')
 api.add_resource(CreateDM, '/dm')
 api.add_resource(GetDMs, '/dms')
 
+# Register PAINTA compliance routes
+api.add_resource(RedactMessage, '/redact')
+api.add_resource(ReportMessage, '/report')
+api.add_resource(EraseUser, '/erase')
+
 # Global error handlers (optional).
 @app.errorhandler(404)
 def not_found(error):
@@ -91,6 +97,5 @@ def server_error(error):
 
 if __name__ == '__main__':
     # context = ('server.crt', 'server.key')
-    app.run(debug=True)
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)

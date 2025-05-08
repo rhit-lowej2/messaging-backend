@@ -140,6 +140,7 @@ class GetPublicMessages(Resource):
             sender_username = sender_info["username"] if sender_info else "Unknown"
 
             messages.append({
+                "message_id": str(msg["_id"]),
                 "sender_id": str(msg["sender_id"]),
                 "sender_username": sender_username,
                 "content": msg["content"],

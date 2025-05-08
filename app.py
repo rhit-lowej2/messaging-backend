@@ -8,6 +8,7 @@ from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from resources.auth import Signup, Login, Profile
 from resources.membership import MembershipUpgrade
+from resources.ads import AdList, AdFetch
 from resources.messages import (DirectMessage, GetDirectMessages, PublicMessage,
                                 GetPublicMessages, GroupMessage, GetGroupMessages)
 from resources.groups import CreateGroup, GetGroups, CreateDM, GetDMs
@@ -21,7 +22,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 from db import get_db
 
-# creating the flask app
+# creating the flask app 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = Config.JWT_SECRET_KEY
 CORS(app)
@@ -65,7 +66,13 @@ scheduler.start()
 api.add_resource(Signup, '/signup')
 api.add_resource(Login, '/login')
 api.add_resource(Profile, '/profile')
+
+# Register membership routes.
 api.add_resource(MembershipUpgrade, '/membership/upgrade')
+
+# Register ads routes.
+api.add_resource(AdList, '/ads')
+api.add_resource(AdFetch, '/ads/fetch')
 
 # Register messaging routes.
 api.add_resource(DirectMessage, '/message/direct')

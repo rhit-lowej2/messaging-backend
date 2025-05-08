@@ -12,6 +12,7 @@ from pymongo import ReturnDocument
 
 # For messaging, we use a separate collection named 'messages' in the default database.
 db = get_db()
+ads_collection = get_db('ads')['ad_list']
 
 def should_show_ad(count: int) -> bool:
     if count in (20, 50, 90):
@@ -54,10 +55,19 @@ class DirectMessage(Resource):
         count = user_doc.get('message_count', 0)
         show_ad = calc_show_ad(count)
 
-        return make_response(jsonify({
+        response = {
             "message": "Direct message sent successfully",
             "showAd": show_ad
-        }), 201)
+        }
+        if show_ad:
+            ad_list = list(ads_collection.aggregate([{"$sample": {"size": 1}}]))
+            if ad_list:
+                ad = ad_list[0]
+                ad["_id"] = str(ad["_id"])
+                response["ad"] = ad
+            else:
+                response["ad"] = None
+        return make_response(jsonify(response), 201)
 
 class GetDirectMessages(Resource):
     @jwt_required()
@@ -118,10 +128,19 @@ class PublicMessage(Resource):
         count = user_doc.get('message_count', 0)
         show_ad = calc_show_ad(count)
 
-        return make_response(jsonify({
-            "message": "Public message sent successfully",
+        response = {
+            "message": "Direct message sent successfully",
             "showAd": show_ad
-        }), 201)
+        }
+        if show_ad:
+            ad_list = list(ads_collection.aggregate([{"$sample": {"size": 1}}]))
+            if ad_list:
+                ad = ad_list[0]
+                ad["_id"] = str(ad["_id"])
+                response["ad"] = ad
+            else:
+                response["ad"] = None
+        return make_response(jsonify(response), 201)
 
 class GetPublicMessages(Resource):
     def get(self):
@@ -178,10 +197,19 @@ class GroupMessage(Resource):
         count = user_doc.get('message_count', 0)
         show_ad = calc_show_ad(count)
 
-        return make_response(jsonify({
-            "message": "Group message sent successfully",
+        response = {
+            "message": "Direct message sent successfully",
             "showAd": show_ad
-        }), 201)
+        }
+        if show_ad:
+            ad_list = list(ads_collection.aggregate([{"$sample": {"size": 1}}]))
+            if ad_list:
+                ad = ad_list[0]
+                ad["_id"] = str(ad["_id"])
+                response["ad"] = ad
+            else:
+                response["ad"] = None
+        return make_response(jsonify(response), 201)
 
 class GetGroupMessages(Resource):
     @jwt_required()

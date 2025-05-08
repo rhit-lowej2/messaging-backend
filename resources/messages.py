@@ -20,6 +20,12 @@ def should_show_ad(count: int) -> bool:
         return True
     return False
 
+def calc_show_ad(user_doc: dict) -> bool:
+    if user_doc.get('is_member', False):
+        return False
+    count = user_doc.get('message_count', 0)
+    return should_show_ad(count)
+                          
 class DirectMessage(Resource):
     @jwt_required()
     def post(self):
@@ -46,7 +52,7 @@ class DirectMessage(Resource):
             return_document=ReturnDocument.AFTER
         )
         count = user_doc.get('message_count', 0)
-        show_ad = should_show_ad(count)
+        show_ad = calc_show_ad(count)
 
         return make_response(jsonify({
             "message": "Direct message sent successfully",
@@ -110,7 +116,7 @@ class PublicMessage(Resource):
             return_document=ReturnDocument.AFTER
         )
         count = user_doc.get('message_count', 0)
-        show_ad = should_show_ad(count)
+        show_ad = calc_show_ad(count)
 
         return make_response(jsonify({
             "message": "Public message sent successfully",
@@ -169,7 +175,7 @@ class GroupMessage(Resource):
             return_document=ReturnDocument.AFTER
         )
         count = user_doc.get('message_count', 0)
-        show_ad = should_show_ad(count)
+        show_ad = calc_show_ad(count)
 
         return make_response(jsonify({
             "message": "Group message sent successfully",

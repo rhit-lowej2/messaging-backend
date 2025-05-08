@@ -42,7 +42,10 @@ class Signup(Resource):
             'password': hash_password(password),
             'created_at': datetime.utcnow(),
             'message_count': 0,
-            'last_reset': datetime.utcnow()
+            'last_reset': datetime.utcnow(),
+            'is_member': False,
+            'member_since': None,
+            'member_expire': None 
         }
         db.users.insert_one(new_user)
         return make_response(jsonify({"message": "User registered successfully"}), 201)
@@ -59,7 +62,11 @@ class Login(Resource):
         user = db.users.find_one({'username': username})
         if user and check_password(password, user['password']):
             # Generate JWT token with 24-hour expiration.
-            access_token = create_access_token(identity=str(user['_id']), expires_delta=timedelta(hours=24))
+            access_token = create_access_token(
+                identity=str(user['_id']),
+                expires_delta=timedelta(hours=24),
+                additional_claims={'is_member': user.get('is_member', False)}
+            )
             return make_response(jsonify({"message": "Login successful", "access_token": access_token}), 200)
         else:
             return make_response(jsonify({"error": "Invalid username or password"}), 401)
@@ -69,7 +76,11 @@ class Profile(Resource):
     def get(self):
         # Retrieve current user from JWT token.
         user_id = get_jwt_identity()
-        user = db.users.find_one({"_id": ObjectId(user_id)}, {"password": 0})
+        user = db.users.find_one(
+            {"_id": ObjectId(user_id)},
+            {"password": 0, "is_member": 1, "member_since": 1, "member_expire": 1,
+             "username":1, "display_name":1, "email":1, "created_at":1}
+        )
         if user:
             user["_id"] = str(user["_id"])
             return make_response(jsonify({"user": user}), 200)

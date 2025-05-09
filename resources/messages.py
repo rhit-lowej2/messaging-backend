@@ -21,7 +21,11 @@ def should_show_ad(count: int) -> bool:
         return True
     return False
 
-def calc_show_ad(user_doc: dict) -> bool:
+def calc_show_ad(sender_id: str) -> bool:
+    db = get_db()
+    user_doc = db.users.find_one({'_id': ObjectId(sender_id)})
+    if not user_doc:
+        return True
     if user_doc.get('is_member', False):
         return False
     count = user_doc.get('message_count', 0)

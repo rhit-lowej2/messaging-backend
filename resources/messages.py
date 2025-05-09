@@ -56,8 +56,8 @@ class DirectMessage(Resource):
             {'$inc': {'message_count': 1}},
             return_document=ReturnDocument.AFTER
         )
-        count = user_doc.get('message_count', 0)
-        show_ad = calc_show_ad(count)
+        # count = user_doc.get('message_count', 0)
+        show_ad = calc_show_ad(sender_id)
 
         response = {
             "message": "Direct message sent successfully",
@@ -129,8 +129,8 @@ class PublicMessage(Resource):
             {'$inc': {'message_count': 1}},
             return_document=ReturnDocument.AFTER
         )
-        count = user_doc.get('message_count', 0)
-        show_ad = calc_show_ad(count)
+        # count = user_doc.get('message_count', 0)
+        show_ad = calc_show_ad(sender_id)
 
         response = {
             "message": "Direct message sent successfully",
@@ -198,8 +198,8 @@ class GroupMessage(Resource):
             {'$inc': {'message_count': 1}},
             return_document=ReturnDocument.AFTER
         )
-        count = user_doc.get('message_count', 0)
-        show_ad = calc_show_ad(count)
+        # count = user_doc.get('message_count', 0)
+        show_ad = calc_show_ad(sender_id)
 
         response = {
             "message": "Direct message sent successfully",
